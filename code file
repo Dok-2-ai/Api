@@ -1,0 +1,331 @@
+import tkinter as tk
+from tkinter import messagebox
+import json
+import os
+
+fails = "accounts.json"
+
+
+# nolasa datus
+def nolasit():
+    if os.path.exists(fails):
+        f = open(fails, "r")
+        dati = json.load(f)
+        f.close()
+        return dati
+    else:
+        return {}
+
+
+# saglaba datus
+def saglabat(dati):
+    f = open(fails, "w")
+    json.dump(dati, f, indent=4)
+    f.close()
+
+
+# LOGIN
+def login():
+    username = username_entry.get()
+    password = password_entry.get()
+
+    dati = nolasit()
+
+    if username == "" or password == "":
+        messagebox.showerror("Error", "Aizpildi visus laukus")
+
+    elif username in dati:
+
+        if dati[username]["password"] == password:
+            messagebox.showinfo(
+                "Login",
+                "Login successful! Sveiks " + username
+            )
+
+        else:
+            messagebox.showerror(
+                "Error",
+                "Nepareiza parole"
+            )
+
+    else:
+        messagebox.showerror(
+            "Error",
+            "Tads accounts neeksiste"
+        )
+
+
+# REGISTER LOGS
+def register_window():
+
+    register_logs = tk.Toplevel(window)
+
+    register_logs.title("Register")
+    register_logs.geometry("350x400")
+
+
+    title = tk.Label(
+        register_logs,
+        text="REGISTER",
+        font=("Arial", 20)
+    )
+
+    title.pack(pady=20)
+
+
+    # USERNAME
+    username_text = tk.Label(
+        register_logs,
+        text="Username"
+    )
+
+    username_text.pack()
+
+    reg_username = tk.Entry(
+        register_logs,
+        width=30
+    )
+
+    reg_username.pack(pady=5)
+
+
+    # PASSWORD
+    password_text = tk.Label(
+        register_logs,
+        text="Password"
+    )
+
+    password_text.pack()
+
+    reg_password = tk.Entry(
+        register_logs,
+        width=30,
+        show="*"
+    )
+
+    reg_password.pack(pady=5)
+
+
+    # GMAIL
+    gmail_text = tk.Label(
+        register_logs,
+        text="Gmail"
+    )
+
+    gmail_text.pack()
+
+    reg_gmail = tk.Entry(
+        register_logs,
+        width=30
+    )
+
+    reg_gmail.pack(pady=5)
+
+
+    # izveido account
+    def izveidot_account():
+
+        username = reg_username.get()
+        password = reg_password.get()
+        gmail = reg_gmail.get()
+
+        dati = nolasit()
+
+        if username == "" or password == "" or gmail == "":
+
+            messagebox.showerror(
+                "Error",
+                "Aizpildi visus laukus"
+            )
+
+        elif username in dati:
+
+            messagebox.showerror(
+                "Error",
+                "Tads accounts jau eksiste"
+            )
+
+        elif "@gmail.com" not in gmail:
+
+            messagebox.showerror(
+                "Error",
+                "Ievadi pareizu Gmail"
+            )
+
+        else:
+
+            dati[username] = {
+                "password": password,
+                "gmail": gmail
+            }
+
+            saglabat(dati)
+
+            messagebox.showinfo(
+                "Register",
+                "Accounts veiksmigi izveidots"
+            )
+
+            register_logs.destroy()
+
+
+    register_button = tk.Button(
+        register_logs,
+        text="Create Account",
+        width=20,
+        command=izveidot_account
+    )
+
+    register_button.pack(pady=20)
+
+
+# DELETE ACCOUNT
+def delete_account():
+
+    username = username_entry.get()
+    password = password_entry.get()
+
+    dati = nolasit()
+
+    if username == "" or password == "":
+
+        messagebox.showerror(
+            "Error",
+            "Ievadi username un password"
+        )
+
+    elif username in dati:
+
+        if dati[username]["password"] == password:
+
+            atbilde = messagebox.askyesno(
+                "Delete Account",
+                "Vai tiesam gribi izdzest savu account?"
+            )
+
+            if atbilde == True:
+
+                del dati[username]
+
+                saglabat(dati)
+
+                username_entry.delete(0, tk.END)
+                password_entry.delete(0, tk.END)
+
+                messagebox.showinfo(
+                    "Delete",
+                    "Accounts ir izdzests"
+                )
+
+        else:
+
+            messagebox.showerror(
+                "Error",
+                "Nepareiza parole"
+            )
+
+    else:
+
+        messagebox.showerror(
+            "Error",
+            "Tads accounts neeksiste"
+        )
+
+
+# =========================
+# GALVENAIS LOGS
+# =========================
+
+window = tk.Tk()
+
+window.title("Account System")
+window.geometry("400x400")
+
+
+title = tk.Label(
+    window,
+    text="ACCOUNT SYSTEM",
+    font=("Arial", 20)
+)
+
+title.pack(pady=25)
+
+
+# USERNAME
+username_text = tk.Label(
+    window,
+    text="Username"
+)
+
+username_text.pack()
+
+username_entry = tk.Entry(
+    window,
+    width=30
+)
+
+username_entry.pack(pady=5)
+
+
+# PASSWORD
+password_text = tk.Label(
+    window,
+    text="Password"
+)
+
+password_text.pack()
+
+password_entry = tk.Entry(
+    window,
+    width=30,
+    show="*"
+)
+
+password_entry.pack(pady=5)
+
+
+# LOGIN
+login_button = tk.Button(
+    window,
+    text="Login",
+    width=20,
+    command=login
+)
+
+login_button.pack(pady=10)
+
+
+# REGISTER
+register_button = tk.Button(
+    window,
+    text="Register",
+    width=20,
+    command=register_window
+)
+
+register_button.pack(pady=5)
+
+
+# DELETE ACCOUNT
+delete_button = tk.Button(
+    window,
+    text="Delete Account",
+    width=20,
+    command=delete_account
+)
+
+delete_button.pack(pady=5)
+
+
+# EXIT
+exit_button = tk.Button(
+    window,
+    text="Exit",
+    width=20,
+    command=window.destroy
+)
+
+exit_button.pack(pady=5)
+
+
+window.mainloop()
